@@ -1,0 +1,10 @@
+# Micromamba environment file
+# https://marketplace.visualstudio.com/items?itemName=corker.vscode-micromamba
+
+name: setlist-to-playlist
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python
