@@ -59,7 +59,6 @@ class SetListInfo:
     city: str
     country: str
     tour: str = None
-    song_count: int = 0
     url: str = ""
     venue_id: str = None
     artist_mbid: str = None
@@ -69,7 +68,7 @@ class SetListInfo:
         if not self.date:
             return None
         try:
-            return datetime.strptime(self.date, '%d-%m-%Y')
+            return datetime.strptime(self.date, '%m-%d-%Y')
         except ValueError:
             return None
     
@@ -297,14 +296,26 @@ class SetlistFMClient:
         data = self.request_handler.make_request(endpoint, params)
         setlists = self.parser.parse_setlist_search(data)
         
-        for setlist in setlists:
-            try:
-                songs = self.get_setlist_songs(setlist.id)
-                setlist.song_count = len(songs)
-            except Exception as e:
-                logger.warning(f"Could not get song count for setlist {setlist.id}: {e}")
-        
         return setlists
+    
+    def get_recent_setlists(self, artist_name, days = 365, limit = 20):
+        artists = self.search_artist(artist_name)
+        if not artists:
+            raise NotFoundError(f"{artist_name} was not found")
+
+        artist_mbid = artists[0]['mbid']
+        all_setlists = []
+        page = 1
+
+        while len(all_setlists) < limit:
+            setlists = self.get_artist_setlists(artist_mbid, page)
+            if not setlists:
+                break
+
+            all_setlists.extend(setlists)
+            page += 1
+        
+        return all_setlists
     
     def get_setlist_songs(self, setlist_id):
         endpoint = f'/setlist/{setlist_id}'
@@ -323,20 +334,28 @@ def main():
     api_key = os.getenv("SETLISTFM_API_KEY")
     client = SetlistFMClient(api_key)
 
-    artists = client.search_artist("Playboi Carti")
-
-    artist = artists[0]
-    artist_mbid = artist['mbid']
-
-    print(f'\n{artist}\n')
-    print(f'\n{artist_mbid}\n')
-
-    setlists = client.get_artist_setlists(artist_mbid)
+    setlists = client.get_recent_setlists("Playboi Carti")
+    for setlist in setlists:
+        print(f"\n{setlist}\n")
 
     setlist = setlists[2]
-    print(f'\n{setlist}\n')
-    songs = client.get_setlist_songs(setlist.id)
-    print(f'\n{songs}\n')
+    songs = client.get_setlist_songs(setlists.id)
+    print(f"\n{songs}\n")
+
+    # artists = client.search_artist("Playboi Carti")
+
+    # artist = artists[0]
+    # artist_mbid = artist['mbid']
+
+    # print(f'\n{artist}\n')
+    # print(f'\n{artist_mbid}\n')
+
+    # setlists = client.get_artist_setlists(artist_mbid)
+
+    # setlist = setlists[2]
+    # print(f'\n{setlist}\n')
+    # songs = client.get_setlist_songs(setlist.id)
+    # print(f'\n{songs}\n')
 
 
 if __name__ == "__main__":

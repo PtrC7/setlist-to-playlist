@@ -7,4 +7,6 @@ channels:
   - conda-forge
 
 dependencies:
-  - python
+  - python=3.13.5=h7de537c_102_cp313
+  - pip:
+    - requests==2.32.4
