@@ -4,10 +4,13 @@ import time
 from datetime import datetime
 import logging
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+load_dotenv()
+
 
 class SetlistFMError(Exception):
     # Custom exception for setlist.fm API errors

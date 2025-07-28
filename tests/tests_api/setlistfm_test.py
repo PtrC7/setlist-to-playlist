@@ -1,6 +1,8 @@
 from api.setlistfm import SetlistFMClient
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
 def test_setlist_api(artist_name):
     api_key = os.getenv("SETLISTFM_API_KEY")
