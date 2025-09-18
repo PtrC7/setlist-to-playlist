@@ -42,7 +42,7 @@ class SpotifyClient:
         
     def search_track(self, song: Song):
         query = f"track:{song.name} artist:{song.original_artist}"
-        logger.info(f"Searching for {query}")
+        logger.info(f"Searching for {query} Tape: {song.tape}\n")
 
         results = self.sp.search(q=query, type="track", limit=1)
         tracks = results.get("tracks", {}).get("items", [])
@@ -54,7 +54,7 @@ class SpotifyClient:
     
     def create_playlist_from_setlist(self, setlist: SetListInfo, songs: List[Song], public: bool = False):
         playlist_name = setlist.display_title
-        description = f"Setlist playlist generated from {setlist.url}"
+        description = f"Playlist generated from {setlist.url}"
 
         logger.info(f"Creating playlist: {playlist_name}")
         playlist = self.sp.user_playlist_create(

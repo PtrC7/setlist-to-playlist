@@ -19,8 +19,11 @@ def test_spotify_playlist(artist_name):
     for idx, setlist in enumerate(setlists):
         print(f"{idx}. {setlist.artist} - {setlist.tour} - {setlist.city} - {setlist.venue} - {setlist.date}\n")
     
-    pos = input("Select a Setlist: ")
+    # pos = input("Select a Setlist: ")
+    pos = 0
     setlist = setlists[int(pos)]
+
+    print(f"\n{setlist.url}\n")
 
     songs = setlist_client.get_setlist_songs(setlist.id)
 

@@ -80,8 +80,8 @@ class DataParser:
             encore_level = set_data.get('encore', 0)
 
             for song_idx, song_data in enumerate(set_data['song']):
-                if song_data.get('tape', False):
-                    continue
+                # if song_data.get('tape', False):
+                    # continue
                 cover_info = song_data.get('cover', {})
 
                 song = Song(
