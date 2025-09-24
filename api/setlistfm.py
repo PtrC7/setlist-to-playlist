@@ -99,9 +99,6 @@ class DataParser:
 
         return songs
 
-    
-
-
 class SetlistFMClient:
     def __init__(self, api_key, cache_ttl = 300):
         self.api_key = api_key

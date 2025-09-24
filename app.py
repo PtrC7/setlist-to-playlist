@@ -1,7 +1,20 @@
-from tests.setlistfm_test import test_setlist_api
-from tests.spotify_test import test_spotify_playlist
+from flask import Flask
+from config import Config
+from routes import register_routes
 
-# artist_name = input("Give me an artist: ")
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    
+    # Register all routes
+    register_routes(app)
+    
+    return app
 
-test_spotify_playlist("Playboi Carti")
-# test_setlist_api("Playboi Carti")
+if __name__ == "__main__":
+    app = create_app()
+    app.run(
+        host="0.0.0.0",
+        port=app.config.get("PORT", 5000),
+        debug=app.config.get("DEBUG", True)
+    )

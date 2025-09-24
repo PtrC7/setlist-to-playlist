@@ -4,6 +4,7 @@
 # Environment
 .env
 .cache
+.spotify_cache
 
 # Conda
 .micromamba
