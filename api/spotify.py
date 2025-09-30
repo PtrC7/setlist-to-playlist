@@ -74,6 +74,6 @@ class SpotifyClient:
         if track_uris:
             self.sp.playlist_add_items(playlist["id"], track_uris)
         else:
-            logger.warning("No tracks found to add to othe playlist")
+            logger.warning("No tracks found to add to the playlist")
         
         return playlist["external_urls"]["spotify"]
