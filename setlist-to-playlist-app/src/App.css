@@ -1,0 +1,88 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+.sidebar {
+  width: 40%;              /* wider sidebar */
+  min-width: 320px;        /* prevent it from getting too small */
+  border-right: 1px solid #ddd;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.main-content {
+  flex: 1;                 /* right side takes remaining space */
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Artist dropdown styling */
+.artist-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.artist-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.artist-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #666;
+  border: 1px solid #ddd;
+  border-top: none;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.artist-item {
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+}
+
+.artist-item:hover {
+  background-color: #f0f0f0;
+}
+
+.artist-name {
+  font-weight: 600;
+}
+
+.artist-meta {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Setlist list */
+.setlist-list h3 {
+  margin-bottom: 0.5rem;
+}
+
+.setlist-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.setlist-item {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.setlist-item:hover {
+  background-color: #f9f9f9;
+}
