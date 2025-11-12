@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from api.setlistfm import SetlistFMClient
-from api.exceptions import APIError, NotFoundError
+from api.spotify import SpotifyClient
+from api.exceptions import APIError, NotFoundError, AuthenticationError
 
 setlist_bp = Blueprint('setlists', __name__)
 
@@ -9,6 +10,16 @@ def get_setlistfm_client():
         api_key=current_app.config['SETLISTFM_API_KEY'],
         cache_ttl=current_app.config['CACHE_TTL']
     )
+
+def get_spotify_client():
+    try:
+        return SpotifyClient(
+            client_id=current_app.config['SPOTIFY_CLIENT_ID'],
+            client_secret=current_app.config['SPOTIFY_CLIENT_SECRET'],
+            redirect_uri=current_app.config['SPOTIFY_REDIRECT_URI']
+        )
+    except AuthenticationError as e:
+        raise e
 
 @setlist_bp.route('/artists/search', methods=['GET'])
 def search_artists():
@@ -58,23 +69,37 @@ def get_setlist_details(setlist_id):
         client = get_setlistfm_client()
         songs = client.get_setlist_songs(setlist_id)
 
+        spotify_client = get_spotify_client()
+        enriched_songs = []
+
+        for song in songs:
+            track_uri = spotify_client.search_track(song)
+            enriched_songs.append({
+                'name': song.name,
+                'artist': song.artist,
+                'original_artist': song.original_artist,
+                'is_cover': song.is_cover,
+                'is_encore': song.is_encore,
+                'encore': song.encore,
+                'position': song.position,
+                'set_number': song.set_number,
+                'info': song.info,
+                'album': track_uri['album'] if track_uri else None,
+                'album_image': track_uri['album_image'] if track_uri else None,
+                'artist_image': track_uri['artist_image'] if track_uri else None,
+                'spotify_uri': track_uri['uri'] if track_uri else None
+            })
+        
+        artist_image = next(
+            (s['artist_image'] for s in enriched_songs if s['artist_image']), None
+        )
+
         return jsonify({
             'success': True,
             'data': {
                 'setlist_id': setlist_id,
-                'songs': [
-                    {
-                        'name': song.name,
-                        'artist': song.artist,
-                        'original_artist': song.original_artist,
-                        'is_cover': song.is_cover,
-                        'is_encore': song.is_encore,
-                        'encore': song.encore,
-                        'position': song.position,
-                        'set_number': song.set_number,
-                        'info': song.info
-                    } for song in songs
-                ]
+                'artist_image': artist_image,
+                'songs': enriched_songs
             }
         })
     
@@ -82,6 +107,9 @@ def get_setlist_details(setlist_id):
         return jsonify({'error': str(e)}), 404
     except APIError as e:
         return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error in get_setlist_details: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @setlist_bp.route('/artists/<artist_name>/recent', methods=['GET'])
