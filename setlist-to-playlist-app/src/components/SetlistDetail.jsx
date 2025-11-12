@@ -8,6 +8,7 @@ export default function SetlistDetail({ setlist }) {
   const [playlistUrl, setPlaylistUrl] = useState(null);
   const [error, setError] = useState(null);
   const [artistImage, setArtistImage] = useState(null);
+  const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
     if (!setlist) return;
@@ -65,6 +66,7 @@ export default function SetlistDetail({ setlist }) {
           city: setlist.city,
           country: setlist.country,
           tour: setlist.tour,
+          public: isPublic,
         }),
       });
 
@@ -157,6 +159,19 @@ export default function SetlistDetail({ setlist }) {
               {selectedCount} of {total} songs selected
             </p>
 
+            <div className="toggle-container">
+              <span className="toggle-label">Private</span>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <span className="toggle-label">Public</span>
+            </div>
+            
             <div className="spotify-actions">
               {playlistUrl ? (
                 <a

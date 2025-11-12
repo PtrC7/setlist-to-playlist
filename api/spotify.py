@@ -95,7 +95,7 @@ class SpotifyClient:
 
 
 
-    def create_playlist_from_setlist(self, setlist: SetListInfo, songs: List[Song], public=False):
+    def create_playlist_from_setlist(self, setlist: SetListInfo, songs: List[Song], public):
         playlist_name = setlist.display_title
         description = f"Playlist generated from {setlist.url}"
         logger.info(f"Creating playlist: {playlist_name}")
