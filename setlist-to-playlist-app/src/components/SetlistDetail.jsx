@@ -9,6 +9,7 @@ export default function SetlistDetail({ setlist }) {
   const [error, setError] = useState(null);
   const [artistImage, setArtistImage] = useState(null);
   const [isPublic, setIsPublic] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (!setlist) return;
@@ -39,6 +40,47 @@ export default function SetlistDetail({ setlist }) {
       .finally(() => setLoading(false));
   }, [setlist]);
 
+  async function checkAuth() {
+    const res = await fetch("/api/auth/me");
+    const data = await res.json();
+    if (data.authenticated) {
+      setUser(data.user);
+      return data.user;
+    } else {
+      setUser(null);
+      return null;
+    }
+  }
+
+  function openSpotifyLoginPopup() {
+    const w = 500, h = 700;
+    const left = window.screenX + (window.outerWidth - w) / 2;
+    const top = window.screenY + (window.outerHeight - h) / 2;
+    const popup = window.open(
+      "/api/auth/login",
+      "Spotify Login",
+      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
+    return new Promise((resolve) => {
+      function handler(evt) {
+        if (evt.data && typeof evt.data === "object" && "success" in evt.data) {
+          window.removeEventListener("message", handler);
+          if (evt.data.success) {
+            checkAuth().then(() => resolve(true));
+          } else {
+            resolve(false);
+          }
+        }
+      }
+      window.addEventListener("message", handler);
+    });
+  }
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+  }
+
   const toggleSong = (pos) => {
     setSelectedSongs((prev) => ({
       ...prev,
@@ -50,9 +92,20 @@ export default function SetlistDetail({ setlist }) {
     if (!setlist) return;
     setCreating(true);
     setError(null);
+
     try {
+      const loggedInUser = await checkAuth();
+      if (!loggedInUser) {
+        await openSpotifyLoginPopup();
+        const newUser = await checkAuth();
+        if (!newUser) {
+          setCreating(false);
+          setError("Spotify login is required to create a playlist.");
+          return;
+        }
+      }
       const selectedKeys = songs
-        .filter((s) => selectedSongs[s.position])     
+        .filter((s) => selectedSongs[s.position])
         .map((s) => ({ position: s.position, set_number: s.set_number }));
 
       const res = await fetch(`/api/playlists/create`, {
@@ -60,7 +113,7 @@ export default function SetlistDetail({ setlist }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           setlist_id: setlist.id,
-          selected: selectedKeys,                     
+          selected: selectedKeys,
           date: setlist.date,
           venue: setlist.venue,
           city: setlist.city,
@@ -173,22 +226,37 @@ export default function SetlistDetail({ setlist }) {
             </div>
             
             <div className="spotify-actions">
-              {playlistUrl ? (
-                <a
-                  href={playlistUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="spotify-button success"
-                >
-                  View Playlist on Spotify
-                </a>
+              {user ? (
+                <>
+                  {playlistUrl ? (
+                    <a
+                      href={playlistUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="spotify-button"
+                    >
+                      View Playlist on Spotify
+                    </a>
+                  ) : (
+                    <button
+                      onClick={handleCreatePlaylist}
+                      disabled={creating}
+                      className="spotify-button"
+                    >
+                      {creating ? "Creating..." : "Create Spotify Playlist"}
+                    </button>
+                  )}
+
+                  <div className="spotify-user-info">
+                    Logged in as <b>{user.name}</b>
+                    <button onClick={handleLogout} className="logout-button">
+                      Log out
+                    </button>
+                  </div>
+                </>
               ) : (
-                <button
-                  onClick={handleCreatePlaylist}
-                  className="spotify-button"
-                  disabled={creating}
-                >
-                  {creating ? "Creating Playlist..." : "Create Spotify Playlist"}
+                <button onClick={openSpotifyLoginPopup} className="spotify-button login">
+                  Log in with Spotify
                 </button>
               )}
               {error && <p className="error-text">{error}</p>}

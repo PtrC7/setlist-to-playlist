@@ -9,7 +9,7 @@ from api.models import Song, SetListInfo
 
 from api.setlistfm import SetlistFMClient, SetlistFMError
 
-from api.spotify import SpotifyClient, SpotifyError
+from api.spotify import SpotifyUserClient, SpotifyAppClient, SpotifyError
 
 __all__ = [
     # Exceptions
@@ -23,7 +23,8 @@ __all__ = [
     # Clients
     'SetlistFMClient',
     'SetlistFMError',
-    'SpotifyClient',
+    'SpotifyAppClient',
+    'SpotifyUserClient',
     'SpotifyError',
 ]
 

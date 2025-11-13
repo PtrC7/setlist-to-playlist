@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from api.setlistfm import SetlistFMClient
-from api.spotify import SpotifyClient
+from api.spotify import SpotifyAppClient
 from api.exceptions import APIError, NotFoundError, AuthenticationError
 
 setlist_bp = Blueprint('setlists', __name__)
@@ -11,12 +11,11 @@ def get_setlistfm_client():
         cache_ttl=current_app.config['CACHE_TTL']
     )
 
-def get_spotify_client():
+def get_spotify_app_client():
     try:
-        return SpotifyClient(
+        return SpotifyAppClient(
             client_id=current_app.config['SPOTIFY_CLIENT_ID'],
-            client_secret=current_app.config['SPOTIFY_CLIENT_SECRET'],
-            redirect_uri=current_app.config['SPOTIFY_REDIRECT_URI']
+            client_secret=current_app.config['SPOTIFY_CLIENT_SECRET']
         )
     except AuthenticationError as e:
         raise e
@@ -69,7 +68,7 @@ def get_setlist_details(setlist_id):
         client = get_setlistfm_client()
         songs = client.get_setlist_songs(setlist_id)
 
-        spotify_client = get_spotify_client()
+        spotify_client = get_spotify_app_client()
         enriched_songs = []
 
         for song in songs:

@@ -1,20 +1,17 @@
 from flask import Blueprint, request, jsonify, current_app, session
-from api.spotify import SpotifyClient
+from api.spotify import SpotifyAppClient, SpotifyUserClient
 from api.setlistfm import SetlistFMClient
 from api.models import SetListInfo
 from api.exceptions import APIError, AuthenticationError, NotFoundError
 
 playlist_bp = Blueprint('playlists', __name__)
 
-def get_spotify_client():
-    try:
-        return SpotifyClient(
-            client_id=current_app.config['SPOTIFY_CLIENT_ID'],
-            client_secret=current_app.config['SPOTIFY_CLIENT_SECRET'],
-            redirect_uri=current_app.config['SPOTIFY_REDIRECT_URI']
-        )
-    except AuthenticationError as e:
-        raise e
+def get_spotify_app_client():
+    return SpotifyAppClient(
+        client_id=current_app.config['SPOTIFY_CLIENT_ID'],
+        client_secret=current_app.config['SPOTIFY_CLIENT_SECRET']
+    )
+
 
 def get_setlistfm_client():
     return SetlistFMClient(
@@ -25,11 +22,21 @@ def get_setlistfm_client():
 @playlist_bp.route('/playlists/create', methods=['POST'])
 def create_playlist():
     try:
+        token = session.get("spotify_token")
+        if not token or not token.get("access_token"):
+            return jsonify({'error': 'Spotify login required'}), 401
+        
+        access_token = token.get("access_token")
+        
+        user_spotify = SpotifyUserClient(access_token=access_token)
+        
+        me = user_spotify.sp.me()
+        print("Authenticated Spotify user (playlist):", me["id"], me.get("display_name"))
+
+        app_spotify = get_spotify_app_client()
+
         data = request.get_json() or {}
         setlist_id = data.get('setlist_id')
-        if not setlist_id:
-            return jsonify({'error': 'setlist_id required'}), 400
-
         public = data.get('public', False)
         selected_keys = data.get('selected') or []
 
@@ -41,10 +48,6 @@ def create_playlist():
             songs = [s for s in all_songs if (s.set_number, s.position) in keyset]
         else:
             songs = all_songs
-
-        current_app.logger.info(
-            f"[create_playlist] setlist_id={setlist_id} total={len(all_songs)} selected={len(songs)}"
-        )
 
         if not songs:
             return jsonify({'error': 'No songs selected'}), 400
@@ -60,8 +63,7 @@ def create_playlist():
             url=f"https://setlist.fm/setlist/{setlist_id}"
         )
 
-        spotify_client = get_spotify_client()
-        playlist_url = spotify_client.create_playlist_from_setlist(setlist_info, songs, public)
+        playlist_url = user_spotify.create_playlist_from_setlist(setlist_info, songs, app_spotify, public)
 
         return jsonify({
             'success': True,
