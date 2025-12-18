@@ -128,6 +128,42 @@ class SetlistFMClient:
         
         return setlists
     
+    def get_artist_setlists_filtered(
+        self,
+        artistmbid,
+        page_limit=5,
+        month=None,
+        year=None,
+        venue=None,
+        tour=None
+    ):
+        results = []
+        page = 1
+
+        while page <= page_limit:
+            setlists = self.get_artist_setlists(artistmbid, page)
+            if not setlists:
+                break
+
+            for s in setlists:
+                if (month or year) and s.formatted_date:
+                    if month and s.formatted_date.month != int(month):
+                        continue
+                    if year and s.formatted_date.year != int(year):
+                        continue
+
+                if venue and venue.lower() not in (s.venue or "").lower():
+                    continue
+
+                if tour and tour.lower() not in (s.tour or "").lower():
+                    continue
+
+                results.append(s)
+
+            page += 1
+
+        return results
+    
     def get_recent_setlists(self, artist_name, days = 365, limit = 20):
         artists = self.search_artist(artist_name)
         if not artists:

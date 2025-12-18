@@ -58,6 +58,31 @@
 }
 .artist-search button:hover { background:#383838; }
 
+.artist-search select {
+  width: 75%;
+  padding: 0.55rem 0.55rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background-color: #111;
+  color: #eee;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+/* Cursor */
+.artist-search select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #aaa 50%),
+    linear-gradient(135deg, #aaa 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 55%,
+    calc(100% - 11px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
 .artist-dropdown {
   position: absolute;
   top: calc(100% - 1px);

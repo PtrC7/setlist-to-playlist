@@ -6,6 +6,11 @@ export default function ArtistSearch({ onSelectArtist }) {
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [venue, setVenue] = useState("");
+  const [tour, setTour] = useState("");
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query) return;
@@ -25,7 +30,16 @@ export default function ArtistSearch({ onSelectArtist }) {
   };
 
   const handleSelect = (artist) => {
-    onSelectArtist(artist);
+    onSelectArtist({
+      ...artist,
+      filters: {
+        month,
+        year,
+        venue,
+        tour,
+      },
+    });
+
     setResults([]);
     setShowDropdown(false);
     setQuery(artist.name);
@@ -36,15 +50,46 @@ export default function ArtistSearch({ onSelectArtist }) {
       <form onSubmit={handleSearch}>
         <input
           type="text"
-          placeholder="Search artist..."
+          placeholder="Search artist…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setShowDropdown(true)}
         />
         <button type="submit">Search</button>
       </form>
 
-      {loading && <p>Loading...</p>}
+      <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.4rem" }}>
+        <select value={month} onChange={(e) => setMonth(e.target.value)}>
+          <option value="">Month</option>
+          {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+            .map((m, i) => (
+              <option key={m} value={i + 1}>{m}</option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Year"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          style={{ width: "80px" }}
+        />
+
+        <input
+          type="text"
+          placeholder="Venue"
+          value={venue}
+          onChange={(e) => setVenue(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Tour"
+          value={tour}
+          onChange={(e) => setTour(e.target.value)}
+        />
+      </div>
+
+      {loading && <p>Loading…</p>}
 
       {showDropdown && results.length > 0 && (
         <ul className="artist-dropdown">

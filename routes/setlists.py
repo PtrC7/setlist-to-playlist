@@ -44,21 +44,44 @@ def search_artists():
         return jsonify({'error': 'Internal server error'}), 500
     
 @setlist_bp.route('/artists/<mbid>/setlists', methods=['Get'])
+@setlist_bp.route('/artists/<mbid>/setlists', methods=['GET'])
 def get_artist_setlists(mbid):
     try:
-        page = int(request.args.get('page', 1))
+        page_limit = int(request.args.get('pages', 5))
+        month = request.args.get('month')
+        year = request.args.get('year')
+        venue = request.args.get('venue')
+        tour = request.args.get('tour')
 
         client = get_setlistfm_client()
-        setlists = client.get_artist_setlists(mbid, page)
+        setlists = client.get_artist_setlists_filtered(
+            artistmbid=mbid,
+            page_limit=page_limit,
+            month=month,
+            year=year,
+            venue=venue,
+            tour=tour
+        )
 
         return jsonify({
             'success': True,
-            'data': setlists,
-            'page': page
+            'count': len(setlists),
+            'data': [
+                {
+                    'id': s.id,
+                    'artist': s.artist,
+                    'date': s.date,
+                    'venue': s.venue,
+                    'city': s.city,
+                    'country': s.country,
+                    'tour': s.tour,
+                    'url': s.url,
+                    'display_title': s.display_title
+                }
+                for s in setlists
+            ]
         })
-    
-    except NotFoundError as e:
-        return jsonify({'error', str(e)}), 404
+
     except APIError as e:
         return jsonify({'error': str(e)}), 500
     

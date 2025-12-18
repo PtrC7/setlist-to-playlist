@@ -29,7 +29,14 @@ export default function SetlistList({ artist, onSelectSetlist }) {
   useEffect(() => {
     if (!artist) return;
     setLoading(true);
-    fetch(`/api/artists/${artist.mbid}/setlists`)
+    const params = new URLSearchParams({
+      pages: 10,
+      month: artist.filters?.month || "",
+      year: artist.filters?.year || "",
+      venue: artist.filters?.venue || "",
+      tour: artist.filters?.tour || "",
+    });
+    fetch(`/api/artists/${artist.mbid}/setlists?${params}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSetlists(data.data);
@@ -37,6 +44,26 @@ export default function SetlistList({ artist, onSelectSetlist }) {
       .catch((err) => console.error("Error fetching setlists:", err))
       .finally(() => setLoading(false));
   }, [artist]);
+
+  const filteredSetlists = useMemo(() => {
+    if (!artist?.filters) return setlists;
+
+    const { month, year, venue, tour } = artist.filters;
+
+    return setlists.filter((s) => {
+      const dt = parseSetlistDate(s.date);
+      if (!dt) return false;
+
+      if (month && dt.getMonth() + 1 !== Number(month)) return false;
+      if (year && dt.getFullYear() !== Number(year)) return false;
+      if (venue && !s.venue?.toLowerCase().includes(venue.toLowerCase()))
+        return false;
+      if (tour && !s.tour?.toLowerCase().includes(tour.toLowerCase()))
+        return false;
+
+      return true;
+    });
+  }, [setlists, artist]);
 
   const today = useMemo(() => {
     const t = new Date();
@@ -58,7 +85,7 @@ export default function SetlistList({ artist, onSelectSetlist }) {
       {loading && <p className="muted">Loading…</p>}
 
       <ul className="setlist-ul">
-        {setlists.map((s) => {
+        {filteredSetlists.map((s) => {
           const dt = parseSetlistDate(s.date);
           const isFuture = dt ? dt.getTime() > today.getTime() : false;
           const formattedDate = formatDatePretty(dt);
