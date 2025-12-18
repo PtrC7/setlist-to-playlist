@@ -5,14 +5,10 @@ function parseSetlistDate(dateStr) {
   const parts = dateStr.split("-");
   if (parts.length !== 3) return null;
 
-  let day, month, year;
-  if (parseInt(parts[0], 10) > 12) {
-    [day, month, year] = parts.map((p) => parseInt(p, 10)); // DD-MM-YYYY
-  } else {
-    [month, day, year] = parts.map((p) => parseInt(p, 10)); // MM-DD-YYYY
-  }
+  const [day, month, year] = parts.map(p => parseInt(p, 10));
 
   const dt = new Date(year, month - 1, day);
+  
   return isNaN(dt.getTime()) ? null : dt;
 }
 
@@ -28,7 +24,7 @@ function formatDatePretty(dt) {
 export default function SetlistList({ artist, onSelectSetlist }) {
   const [setlists, setSetlists] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedId, setSelectedId] = useState(null); // ✅ track selected concert
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     if (!artist) return;
@@ -51,7 +47,7 @@ export default function SetlistList({ artist, onSelectSetlist }) {
   if (!artist) return <p className="muted">Search an artist to view setlists</p>;
 
   const handleSelect = (setlist) => {
-    setSelectedId(setlist.id); // ✅ update selection
+    setSelectedId(setlist.id);
     onSelectSetlist(setlist);
   };
 
@@ -66,7 +62,7 @@ export default function SetlistList({ artist, onSelectSetlist }) {
           const dt = parseSetlistDate(s.date);
           const isFuture = dt ? dt.getTime() > today.getTime() : false;
           const formattedDate = formatDatePretty(dt);
-          const isSelected = s.id === selectedId; // ✅
+          const isSelected = s.id === selectedId;
 
           return (
             <li
