@@ -83,6 +83,23 @@
   background-repeat: no-repeat;
 }
 
+.artist-search-form {
+  display: flex;
+  flex-direction: column;   
+  gap: 0.4rem;
+}
+
+.artist-search-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.artist-filter-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
 .artist-dropdown {
   position: absolute;
   top: calc(100% - 1px);
@@ -175,6 +192,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.setlist-tour {
+  color: #aaa;               
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
 }
 
 .setlist-date {

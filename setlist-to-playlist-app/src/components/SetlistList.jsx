@@ -105,6 +105,7 @@ export default function SetlistList({ artist, onSelectSetlist }) {
                   {s.venue}
                   {s.city ? `, ${s.city}` : ""}
                 </div>
+                <div className="setlist-tour">{s.tour}</div>
                 {formattedDate && (
                   <div className="setlist-date">{formattedDate}</div>
                 )}
